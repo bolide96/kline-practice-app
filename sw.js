@@ -1,7 +1,7 @@
-const CACHE_NAME = 'kline-practice-pwa-v2';
-const APP_ASSETS = [
-  './',
-  './index.html',
+const CACHE_NAME = 'kline-practice-pwa-v3';
+const OFFLINE_PAGE = './index.html';
+
+const STATIC_ASSETS = [
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -10,7 +10,11 @@ const APP_ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_ASSETS))
+    caches.open(CACHE_NAME).then(async cache => {
+      await cache.addAll(STATIC_ASSETS);
+      const response = await fetch('./index.html', { cache: 'reload' });
+      await cache.put(OFFLINE_PAGE, response);
+    })
   );
   self.skipWaiting();
 });
@@ -26,14 +30,33 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
+  // Always try the network first for page navigation.
+  // This prevents an old index.html from remaining visible after a GitHub update.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' })
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(OFFLINE_PAGE, copy));
+          return response;
+        })
+        .catch(() => caches.match(OFFLINE_PAGE))
+    );
+    return;
+  }
+
+  // Static files: return cache quickly, while updating it in the background.
   event.respondWith(
     caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+      const networkRequest = fetch(event.request).then(response => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
         return response;
-      }).catch(() => caches.match('./index.html'));
+      });
+      return cached || networkRequest;
     })
   );
 });

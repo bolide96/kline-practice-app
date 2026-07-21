@@ -142,7 +142,7 @@
   <section class="hero">
     <div>
       <h1>K 線新手練習室</h1>
-      <p>每天練一張圖：先看週期、再看位置與趨勢，最後才看紅綠 K。內建引導題、挑戰題、遮右揭曉與自由上傳練習。</p>
+      <p>每天練一張圖：先看週期、再看位置與趨勢，最後才看紅綠 K。內建引導題、挑戰題、遮右揭曉與自由上傳練習。</p><div style="margin-top:10px"><span class="pill" style="background:#dbeafe;color:#1d4ed8">版本 v3・完整教學版</span></div>
     </div>
     <div style="display:grid;gap:10px;justify-items:center">
       <div class="hero-badge">📈</div>
@@ -432,7 +432,7 @@
   </section>
 
 
-  <div class="footer-note">本工具只供學習技術分析與風險判讀，不構成投資建議，也不保證未來漲跌。</div>
+  <div class="footer-note">本工具只供學習技術分析與風險判讀，不構成投資建議，也不保證未來漲跌。<br><button id="forceUpdateBtn" class="btn outline small" type="button" style="margin-top:10px">清除舊快取並載入最新版</button></div>
 </div>
 
 <script>
@@ -652,10 +652,44 @@ window.addEventListener('appinstalled', () => {
 });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((err) => {
+  let refreshing = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js', {
+        updateViaCache: 'none'
+      });
+      await registration.update();
+    } catch (err) {
       console.warn('Service Worker 註冊失敗：', err);
-    });
+    }
+  });
+}
+
+const forceUpdateBtn = document.getElementById('forceUpdateBtn');
+if (forceUpdateBtn) {
+  forceUpdateBtn.addEventListener('click', async () => {
+    forceUpdateBtn.disabled = true;
+    forceUpdateBtn.textContent = '正在更新…';
+    try {
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map(reg => reg.unregister()));
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(key => caches.delete(key)));
+      }
+    } finally {
+      const cleanUrl = new URL('./?updated=v3&t=' + Date.now(), window.location.href);
+      window.location.replace(cleanUrl.href);
+    }
   });
 }
 </script>
