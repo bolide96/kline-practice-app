@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>K 線新手練習室</title>
+  <meta name="description" content="適合新手的 K 線圖判讀與模擬練習工具">
+  <meta name="application-name" content="K 線練習室">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="K線練習室">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <style>
+    :root{
+      --bg:#f3f6fb; --card:#ffffff; --ink:#172033; --muted:#667085; --line:#dbe3ef;
+      --blue:#2563eb; --blue2:#eaf1ff; --red:#e53935; --green:#16a34a; --orange:#f59e0b;
+      --shadow:0 12px 30px rgba(15,23,42,.08); --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
+      color:var(--ink); background:linear-gradient(180deg,#eef4ff 0,#f7f9fc 240px,var(--bg) 100%);
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:1180px;margin:auto;padding:18px 16px 48px}
+    .hero{
+      background:linear-gradient(135deg,#0f172a,#1e3a8a); color:white; border-radius:24px;
+      padding:24px; box-shadow:var(--shadow); display:grid; grid-template-columns:1fr auto; gap:20px;
+      align-items:center;
+    }
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,46px);letter-spacing:.02em}
+    .hero p{margin:0;color:#dbeafe;line-height:1.7}
+    .hero-badge{
+      width:110px;height:110px;border-radius:28px;background:rgba(255,255,255,.12);
+      display:grid;place-items:center;font-size:56px;border:1px solid rgba(255,255,255,.22)
+    }
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+    .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+    .stat b{display:block;font-size:26px;margin-top:4px}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:4px 0 12px}
+    .tab{
+      border:1px solid var(--line);background:white;border-radius:999px;padding:11px 16px;white-space:nowrap;
+      color:#344054;font-weight:800
+    }
+    .tab.active{background:var(--blue);color:white;border-color:var(--blue)}
+    .panel{display:none}.panel.active{display:block}
+    .grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(300px,.8fr);gap:16px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .card h2,.card h3{margin:0 0 12px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+    .btn{
+      border:0;border-radius:12px;padding:10px 14px;font-weight:800;background:#edf2f7;color:#263244
+    }
+    .btn.primary{background:var(--blue);color:white}
+    .btn.success{background:#dcfce7;color:#166534}
+    .btn.warn{background:#fff7ed;color:#9a3412}
+    .btn.danger{background:#fee2e2;color:#991b1b}
+    .btn.outline{background:white;border:1px solid var(--line)}
+    .btn.small{padding:7px 10px;font-size:14px}
+    .seg{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:white}
+    .seg button{border:0;background:white;padding:9px 13px;font-weight:800;color:#475467}
+    .seg button.active{background:#dbeafe;color:#1d4ed8}
+    .chart-wrap{background:#0b1020;border-radius:16px;padding:10px;position:relative;overflow:hidden}
+    #chart{width:100%;height:430px;display:block}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;color:#475467;font-size:14px;margin-top:10px}
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
+    .question-title{font-size:20px;font-weight:900;margin-bottom:10px}
+    .choices{display:grid;gap:10px}
+    .choice{
+      text-align:left;border:1px solid var(--line);background:white;border-radius:13px;padding:12px 14px;
+      transition:.15s;font-weight:700
+    }
+    .choice:hover{transform:translateY(-1px);border-color:#93c5fd}
+    .choice.correct{background:#ecfdf3;border-color:#16a34a;color:#166534}
+    .choice.wrong{background:#fff1f2;border-color:#ef4444;color:#991b1b}
+    .choice:disabled{cursor:default}
+    .feedback{margin-top:12px;border-radius:13px;padding:13px;line-height:1.65;display:none}
+    .feedback.show{display:block}
+    .feedback.ok{background:#ecfdf3;color:#166534}
+    .feedback.no{background:#fff7ed;color:#9a3412}
+    .progress{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:10px 0 16px}
+    .progress span{display:block;height:100%;background:linear-gradient(90deg,#3b82f6,#22c55e);width:0}
+    .tip{background:#eff6ff;border-left:4px solid var(--blue);padding:13px 14px;border-radius:12px;line-height:1.65}
+    .mini-list{display:grid;gap:10px;margin-top:12px}
+    .mini-item{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:12px}
+    .step-num{width:28px;height:28px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:grid;gap:6px;color:#344054;font-weight:800}
+    input,select,textarea{
+      width:100%;border:1px solid #cfd8e6;border-radius:12px;padding:11px;background:white;color:#172033
+    }
+    textarea{min-height:100px;resize:vertical}
+    .upload-box{
+      border:2px dashed #a8b7ce;border-radius:16px;min-height:360px;display:grid;place-items:center;
+      background:#f8fafc;overflow:hidden;color:#667085;text-align:center;padding:16px
+    }
+    .upload-box img{max-width:100%;max-height:620px;object-fit:contain}
+    .history{display:grid;gap:10px;max-height:430px;overflow:auto}
+    .history-item{border:1px solid var(--line);border-radius:13px;padding:12px;background:#fbfdff}
+    .history-item small{color:var(--muted)}
+    .pill{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:900}
+    .result-box{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff;line-height:1.7}
+    .footer-note{margin-top:18px;text-align:center;color:#667085;font-size:14px}
+    .hidden{display:none!important}
+    @media(max-width:860px){
+      .hero{grid-template-columns:1fr}.hero-badge{display:none}
+      .stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}
+      #chart{height:360px}.form-grid{grid-template-columns:1fr}
+    }
+    @media(max-width:520px){
+      .app{padding:10px 10px 36px}.hero{padding:20px}.stats{gap:8px}
+      .stat{padding:12px}.stat b{font-size:21px}.card{padding:14px}
+      #chart{height:320px}.toolbar{align-items:stretch}.toolbar>*{flex:1}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <section class="hero">
+    <div>
+      <h1>K 線新手練習室</h1>
+      <p>每天練一張圖：先看週期、再看位置與趨勢，最後才看紅綠 K。內建引導題、挑戰題、遮右揭曉與自由上傳練習。</p>
+    </div>
+    <div style="display:grid;gap:10px;justify-items:center">
+      <div class="hero-badge">📈</div>
+      <button id="installAppBtn" class="btn success hidden" type="button">安裝到桌面</button>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stat"><span>完成題數</span><b id="statTotal">0</b></div>
+    <div class="stat"><span>答對率</span><b id="statRate">0%</b></div>
+    <div class="stat"><span>連續答對</span><b id="statStreak">0</b></div>
+    <div class="stat"><span>練習紀錄</span><b id="statNotes">0</b></div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="guided">引導練習</button>
+    <button class="tab" data-tab="challenge">挑戰模式</button>
+    <button class="tab" data-tab="reveal">遮右揭曉</button>
+    <button class="tab" data-tab="free">自由看圖</button>
+    <button class="tab" data-tab="learn">速查教學</button>
+  </nav>
+
+  <section id="guided" class="panel active">
+    <div class="grid">
+      <div class="card">
+        <div class="toolbar">
+          <button class="btn primary" id="guidedNew">換一張練習圖</button>
+          <div class="seg timeframe">
+            <button class="active" data-tf="日K">日 K</button>
+            <button data-tf="週K">週 K</button>
+            <button data-tf="月K">月 K</button>
+          </div>
+          <button class="btn outline small ma-toggle" data-ma="5">MA5</button>
+          <button class="btn outline small ma-toggle" data-ma="10">MA10</button>
+          <button class="btn outline small ma-toggle" data-ma="20">MA20</button>
+        </div>
+        <div class="chart-wrap"><svg id="chart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+        <div class="legend">
+          <span><i class="dot" style="background:#ef4444"></i>紅 K：收盤高於開盤</span>
+          <span><i class="dot" style="background:#22c55e"></i>綠 K：收盤低於開盤</span>
+          <span><i class="dot" style="background:#60a5fa"></i>均線</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>逐步判讀</h2>
+        <div class="progress"><span id="guidedProgress"></span></div>
+        <div class="question-title" id="guidedQuestion"></div>
+        <div class="choices" id="guidedChoices"></div>
+        <div class="feedback" id="guidedFeedback"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn primary hidden" id="guidedNext">下一題</button>
+          <button class="btn outline" id="guidedHint">給我提示</button>
+        </div>
+        <div class="tip" id="guidedTip" style="margin-top:14px">
+          新手先不要猜明天漲跌，先把「趨勢、位置、均線、量能、支撐壓力」說清楚。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="challenge" class="panel">
+    <div class="grid">
+      <div class="card">
+        <div class="toolbar">
+          <button class="btn primary" id="challengeStart">開始 5 題挑戰</button>
+          <span class="pill" id="challengeCount">尚未開始</span>
+        </div>
+        <div class="chart-wrap"><svg id="challengeChart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+      </div>
+      <div class="card">
+        <h2>挑戰題</h2>
+        <div class="question-title" id="challengeQuestion">按「開始 5 題挑戰」開始。</div>
+        <div class="choices" id="challengeChoices"></div>
+        <div class="feedback" id="challengeFeedback"></div>
+        <button class="btn primary hidden" id="challengeNext" style="margin-top:12px">下一題</button>
+        <div id="challengeSummary" class="result-box hidden" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reveal" class="panel">
+    <div class="grid">
+      <div class="card">
+        <div class="toolbar">
+          <button class="btn primary" id="revealNew">換一張遮右圖</button>
+          <button class="btn success" id="revealBtn">揭曉後 8 根 K</button>
+          <button class="btn outline" id="hideAgain">重新遮住</button>
+        </div>
+        <div class="chart-wrap"><svg id="revealChart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+      </div>
+      <div class="card">
+        <h2>先寫判斷，再揭曉</h2>
+        <label>你預測接下來 8 根 K 的方向
+          <select id="predictDir">
+            <option value="">請選擇</option>
+            <option value="up">偏上</option>
+            <option value="down">偏下</option>
+            <option value="flat">盤整</option>
+          </select>
+        </label>
+        <label style="margin-top:10px">你的理由
+          <textarea id="predictReason" placeholder="例如：高點、低點持續墊高，均線向上，但接近前高壓力。"></textarea>
+        </label>
+        <div class="tip" style="margin-top:12px">重點不是每次猜對，而是確認你的理由有沒有一致、支撐壓力有沒有畫對。</div>
+        <div id="revealResult" class="result-box hidden" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="free" class="panel">
+    <div class="grid">
+      <div class="card">
+        <h2>上傳你自己的 K 線截圖</h2>
+        <div class="toolbar">
+          <label class="btn primary" style="display:inline-block">
+            選擇圖片
+            <input id="imageUpload" type="file" accept="image/*" style="display:none">
+          </label>
+          <button class="btn outline" id="clearImage">清除圖片</button>
+        </div>
+        <div class="upload-box" id="uploadBox">
+          <div>📷<br>上傳券商或看盤 App 的 K 線截圖<br><small>圖片只在你的瀏覽器中顯示，不會上傳到伺服器。</small></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>固定七題練習表</h2>
+        <div class="form-grid">
+          <label>股票／標的<input id="noteSymbol" placeholder="例如：中美晶"></label>
+          <label>週期<select id="noteTf"><option>日 K</option><option>週 K</option><option>月 K</option><option>分 K</option></select></label>
+          <label>目前趨勢<select id="noteTrend"><option>上升</option><option>下降</option><option>盤整</option><option>看不清楚</option></select></label>
+          <label>目前位置<select id="notePos"><option>低檔</option><option>半山腰</option><option>接近前高</option><option>高檔</option><option>盤整區</option></select></label>
+          <label>支撐區<input id="noteSupport" placeholder="例如：150～155"></label>
+          <label>壓力區<input id="noteResistance" placeholder="例如：170～175"></label>
+        </div>
+        <label style="margin-top:10px">K 棒、均線與成交量觀察
+          <textarea id="noteObserve" placeholder="例如：MA5、MA10 向上；突破時放量；最新 K 有長上影。"></textarea>
+        </label>
+        <label style="margin-top:10px">三句結論
+          <textarea id="noteConclusion" placeholder="1. 目前趨勢…&#10;2. 關鍵位置…&#10;3. 接下來要確認…"></textarea>
+        </label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn primary" id="saveNote">儲存練習紀錄</button>
+          <button class="btn outline" id="exportCsv">匯出 CSV</button>
+          <button class="btn danger" id="clearNotes">清除紀錄</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>我的練習紀錄</h2>
+      <div class="history" id="history"></div>
+    </div>
+  </section>
+
+  <section id="learn" class="panel">
+    <div class="grid">
+      <div class="card">
+        <h2>新手看圖固定順序</h2>
+        <div class="mini-list">
+          <div class="mini-item"><span class="step-num">1</span><div><b>看週期</b><br>日 K 一根代表一天；週 K 一根代表一週；月 K 一根代表一個月。</div></div>
+          <div class="mini-item"><span class="step-num">2</span><div><b>看位置</b><br>同樣一根大紅 K，出現在低檔與高檔，意義完全不同。</div></div>
+          <div class="mini-item"><span class="step-num">3</span><div><b>看趨勢</b><br>高點、低點墊高是上升；高點、低點降低是下降。</div></div>
+          <div class="mini-item"><span class="step-num">4</span><div><b>看 K 棒</b><br>長上影看上方賣壓；長下影看下方承接；十字線代表暫時僵持。</div></div>
+          <div class="mini-item"><span class="step-num">5</span><div><b>看均線</b><br>股價在向上均線之上通常較強；均線向下通常較弱。</div></div>
+          <div class="mini-item"><span class="step-num">6</span><div><b>看成交量</b><br>突破放量通常較可靠；高檔爆量不漲要注意賣壓。</div></div>
+          <div class="mini-item"><span class="step-num">7</span><div><b>找支撐壓力</b><br>用「區域」思考，不要把它當成一個精準數字。</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>最簡單口訣</h2>
+        <div class="result-box" style="font-size:22px;font-weight:900;line-height:1.8">
+          先看大方向<br>
+          再看關鍵位置<br>
+          最後才看紅綠 K
+        </div>
+        <h3 style="margin-top:18px">新手先不要做的事</h3>
+        <div class="mini-list">
+          <div class="mini-item">不要看到一根大紅 K 就追。</div>
+          <div class="mini-item">不要一開始同時開十幾個指標。</div>
+          <div class="mini-item">不要只猜明天漲跌，卻沒有失效條件。</div>
+          <div class="mini-item">不要用真金白銀測試還沒練熟的判斷。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">本工具只供學習技術分析與風險判讀，不構成投資建議，也不保證未來漲跌。</div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const storeKey='kline_practice_v1';
+const state = JSON.parse(localStorage.getItem(storeKey)||'{"total":0,"correct":0,"streak":0,"notes":[]}');
+function saveState(){localStorage.setItem(storeKey,JSON.stringify(state));renderStats();renderHistory()}
+function renderStats(){
+  $('#statTotal').textContent=state.total;
+  $('#statRate').textContent=state.total?Math.round(state.correct/state.total*100)+'%':'0%';
+  $('#statStreak').textContent=state.streak;
+  $('#statNotes').textContent=state.notes.length;
+}
+$$('.tab').forEach(b=>b.onclick=()=>{
+  $$('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  $$('.panel').forEach(x=>x.classList.remove('active')); $('#'+b.dataset.tab).classList.add('active');
+});
+
+function rng(seed){let t=seed;return()=>{t+=0x6D2B79F5;let r=Math.imul(t^t>>>15,1|t);r^=r+Math.imul(r^r>>>7,61|r);return((r^r>>>14)>>>0)/4294967296}}
+function makeData(kind,seed=1,n=60){
+  const r=rng(seed); let data=[], close=100;
+  for(let i=0;i<n;i++){
+    let drift=0, volBase=700;
+    if(kind==='up') drift=.8;
+    if(kind==='down') drift=-.7;
+    if(kind==='range') drift=Math.sin(i/3)*.15;
+    if(kind==='breakout') drift=i<40?Math.sin(i/3)*.1:(i<50?1.7:.45);
+    if(kind==='top') drift=i<40?1.0:(i<48?.35:-1.15);
+    if(kind==='bottom') drift=i<36?-.85:(i<46?.1:1.05);
+    let o=close+(r()-.5)*2.4;
+    let c=Math.max(12,o+drift+(r()-.5)*4.5);
+    let h=Math.max(o,c)+r()*3.6;
+    let l=Math.min(o,c)-r()*3.6;
+    let v=Math.round(volBase+r()*700+Math.abs(c-o)*160);
+    data.push({o,h,l,c,v}); close=c;
+  }
+  return data;
+}
+const scenarios=[
+ {id:'up',name:'多頭回檔',kind:'up',trend:'up',position:'middle',candle:'normal',volume:'healthy',
+  explain:'高點與低點持續墊高，均線多數向上；雖有回檔，但結構仍偏多。'},
+ {id:'down',name:'空頭反彈',kind:'down',trend:'down',position:'low',candle:'normal',volume:'weak',
+  explain:'高點與低點逐步降低，股價多在均線下方，反彈容易遇到均線壓力。'},
+ {id:'range',name:'箱型盤整',kind:'range',trend:'flat',position:'range',candle:'doji',volume:'quiet',
+  explain:'價格在固定區間反覆震盪，均線糾結，尚未出現明確方向。'},
+ {id:'breakout',name:'盤整突破',kind:'breakout',trend:'up',position:'breakout',candle:'strongup',volume:'breakout',
+  explain:'長時間盤整後向上突破，若成交量同步增加，突破可信度通常較高。'},
+ {id:'top',name:'高檔轉弱',kind:'top',trend:'down',position:'high',candle:'upper',volume:'sell',
+  explain:'大漲後接近高檔，出現長上影或跌破短均線，表示上方賣壓增加。'},
+ {id:'bottom',name:'低檔轉強',kind:'bottom',trend:'up',position:'low',candle:'lower',volume:'buy',
+  explain:'長期下跌後在低檔出現承接，低點不再創低並站回短均線，可能開始轉強。'}
+];
+function scenarioData(sc,seed){
+  let d=makeData(sc.kind,seed,60);
+  let last=d[d.length-1], prev=d[d.length-2];
+  if(sc.candle==='doji'){last.o=prev.c+(Math.random()-.5);last.c=last.o+(Math.random()-.5)*.3;last.h=last.o+3;last.l=last.o-3}
+  if(sc.candle==='upper'){last.o=prev.c;last.c=last.o-1.2;last.h=last.o+8;last.l=last.c-1.5;last.v*=1.8}
+  if(sc.candle==='lower'){last.o=prev.c;last.c=last.o+1.2;last.l=last.o-8;last.h=last.c+1.5;last.v*=1.7}
+  if(sc.candle==='strongup'){last.o=prev.c;last.c=last.o+6;last.h=last.c+1.5;last.l=last.o-1;last.v*=1.8}
+  return d;
+}
+function sma(data,p,i){if(i<p-1)return null;let s=0;for(let k=i-p+1;k<=i;k++)s+=data[k].c;return s/p}
+function renderChart(svg,data,opt={}){
+  const visible=opt.visible??data.length, d=data.slice(0,visible), W=900,H=430,pad={l:48,r:20,t:20,b:95};
+  const priceH=H-pad.t-pad.b, volTop=H-78, volH=58;
+  const min=Math.min(...d.map(x=>x.l)), max=Math.max(...d.map(x=>x.h)), range=max-min||1;
+  const xStep=(W-pad.l-pad.r)/d.length, body=Math.max(3,xStep*.56);
+  const y=v=>pad.t+(max-v)/range*(priceH-20), vy=v=>H-20-v/Math.max(...d.map(x=>x.v))*volH;
+  let s=`<rect x="0" y="0" width="${W}" height="${H}" fill="#0b1020"/>`;
+  for(let i=0;i<5;i++){let yy=pad.t+i*(priceH-20)/4;s+=`<line x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}" stroke="#26324a" stroke-width="1"/>`;
+    let val=(max-i*range/4).toFixed(1);s+=`<text x="4" y="${yy+4}" fill="#94a3b8" font-size="12">${val}</text>`}
+  d.forEach((k,i)=>{
+    let x=pad.l+i*xStep+xStep/2, color=k.c>=k.o?'#ef4444':'#22c55e';
+    s+=`<line x1="${x}" y1="${y(k.h)}" x2="${x}" y2="${y(k.l)}" stroke="${color}" stroke-width="1.5"/>`;
+    let yy=Math.min(y(k.o),y(k.c)), hh=Math.max(2,Math.abs(y(k.o)-y(k.c)));
+    s+=`<rect x="${x-body/2}" y="${yy}" width="${body}" height="${hh}" rx="1" fill="${color}"/>`;
+    s+=`<rect x="${x-body/2}" y="${vy(k.v)}" width="${body}" height="${H-20-vy(k.v)}" fill="${color}" opacity=".72"/>`;
+  });
+  const maColors={5:'#60a5fa',10:'#f59e0b',20:'#a78bfa'};
+  (opt.mas||[5,10,20]).forEach(p=>{
+    let pts=[];d.forEach((_,i)=>{let m=sma(d,p,i);if(m!==null)pts.push(`${pad.l+i*xStep+xStep/2},${y(m)}`)});
+    if(pts.length)s+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${maColors[p]}" stroke-width="2"/>`;
+  });
+  s+=`<line x1="${pad.l}" y1="${volTop-4}" x2="${W-pad.r}" y2="${volTop-4}" stroke="#334155"/>`;
+  s+=`<text x="${pad.l}" y="16" fill="#e2e8f0" font-size="14">${opt.title||''}　${opt.timeframe||'日 K'}</text>`;
+  if(opt.mask){
+    let mx=pad.l+visible*xStep;
+    s+=`<rect x="${mx}" y="${pad.t}" width="${W-mx-pad.r}" height="${priceH+58}" fill="#111827" opacity=".94"/>`;
+    s+=`<text x="${mx+20}" y="${pad.t+44}" fill="#fbbf24" font-size="22" font-weight="700">未來 K 線已遮住</text>`;
+  }
+  svg.innerHTML=s;
+}
+function randSc(){return scenarios[Math.floor(Math.random()*scenarios.length)]}
+let tf='日K', mas=[5,10,20], guidedSc, guidedData, guidedIndex=0;
+const guidedQs=[
+ sc=>({q:'這張圖目前最接近哪一種趨勢？',ans:sc.trend,opts:[['up','上升趨勢'],['down','下降趨勢'],['flat','盤整']],hint:'先看高點與低點是否墊高或降低，不要只看最後一根 K。'}),
+ sc=>({q:'股價目前的位置較接近哪裡？',ans:sc.position,opts:[['low','相對低檔'],['middle','上升途中／半山腰'],['high','大漲後高檔'],['range','盤整區'],['breakout','剛突破整理區']],hint:'把整張圖縮小看：是跌很久後、漲很久後，還是在區間內？'}),
+ sc=>({q:'最後一根 K 棒最值得注意的是？',ans:sc.candle,opts:[['normal','一般 K 棒，沒有特殊長影線'],['doji','十字線／多空僵持'],['upper','長上影線／上方賣壓'],['lower','長下影線／下方承接'],['strongup','實體大紅 K／買方較強']],hint:'觀察實體大小與上下影線長度。'}),
+ sc=>({q:'成交量與走勢的關係較接近？',ans:sc.volume,opts:[['healthy','趨勢中量能大致正常'],['weak','反彈力道不足或賣壓偏重'],['quiet','盤整量縮、等待方向'],['breakout','突破時放量，可信度較高'],['sell','高檔放量不穩，注意賣壓'],['buy','低檔出量承接，可能轉強']],hint:'量要和價格位置一起看：低檔放量與高檔爆量的意義不同。'}),
+ sc=>({q:'這張圖最合理的結論是？',ans:sc.id,opts:scenarios.map(x=>[x.id,x.name]),hint:'把趨勢、位置、K 棒與成交量合在一起判斷。'})
+];
+function startGuided(){
+  guidedSc=randSc(); guidedData=scenarioData(guidedSc,Date.now()%100000); guidedIndex=0;
+  renderChart($('#chart'),guidedData,{title:guidedSc.name,timeframe:tf,mas}); showGuided();
+}
+function showGuided(){
+  const item=guidedQs[guidedIndex](guidedSc);
+  $('#guidedProgress').style.width=(guidedIndex/guidedQs.length*100)+'%';
+  $('#guidedQuestion').textContent=`第 ${guidedIndex+1} 題｜${item.q}`;
+  $('#guidedChoices').innerHTML='';
+  item.opts.forEach(([v,t])=>{let b=document.createElement('button');b.className='choice';b.textContent=t;b.onclick=()=>answerGuided(v,b,item);$('#guidedChoices').appendChild(b)});
+  $('#guidedFeedback').className='feedback';$('#guidedFeedback').textContent='';
+  $('#guidedNext').classList.add('hidden');$('#guidedHint').onclick=()=>{$('#guidedTip').textContent='提示：'+item.hint};
+}
+function answerGuided(v,b,item){
+  $$('#guidedChoices .choice').forEach(x=>x.disabled=true);
+  let ok=v===item.ans; b.classList.add(ok?'correct':'wrong');
+  if(!ok){[...$('#guidedChoices').children].forEach((x,i)=>{if(item.opts[i][0]===item.ans)x.classList.add('correct')})}
+  state.total++; if(ok){state.correct++;state.streak++}else state.streak=0;saveState();
+  $('#guidedFeedback').className='feedback show '+(ok?'ok':'no');
+  $('#guidedFeedback').textContent=(ok?'答對了。':'這題再注意一下。')+' '+guidedSc.explain;
+  $('#guidedNext').classList.remove('hidden');
+  $('#guidedNext').textContent=guidedIndex===guidedQs.length-1?'完成並換下一張':'下一題';
+}
+$('#guidedNext').onclick=()=>{guidedIndex++;if(guidedIndex>=guidedQs.length)startGuided();else showGuided()};
+$('#guidedNew').onclick=startGuided;
+$$('.timeframe button').forEach(b=>b.onclick=()=>{
+  $$('.timeframe button').forEach(x=>x.classList.remove('active'));b.classList.add('active');tf=b.dataset.tf;
+  renderChart($('#chart'),guidedData,{title:guidedSc.name,timeframe:tf,mas});
+});
+$$('.ma-toggle').forEach(b=>b.onclick=()=>{
+  const p=+b.dataset.ma;mas=mas.includes(p)?mas.filter(x=>x!==p):[...mas,p].sort((a,b)=>a-b);
+  b.classList.toggle('primary',mas.includes(p));renderChart($('#chart'),guidedData,{title:guidedSc.name,timeframe:tf,mas});
+});
+
+let cq=0,cscore=0,csc,cdata;
+function startChallenge(){cq=0;cscore=0;$('#challengeSummary').classList.add('hidden');nextChallenge()}
+function nextChallenge(){
+  if(cq>=5){$('#challengeQuestion').textContent='挑戰完成';$('#challengeChoices').innerHTML='';$('#challengeFeedback').className='feedback';
+    $('#challengeSummary').classList.remove('hidden');$('#challengeSummary').innerHTML=`本次答對 <b>${cscore} / 5</b> 題。<br>${cscore>=4?'很不錯，開始能把趨勢、位置與量價連在一起了。':'先回到引導模式，把固定順序練熟再挑戰。'}`;return}
+  csc=randSc();cdata=scenarioData(csc,(Date.now()+cq*77)%100000);renderChart($('#challengeChart'),cdata,{title:'挑戰圖',timeframe:'日 K',mas:[5,10,20]});
+  let q=guidedQs[Math.floor(Math.random()*guidedQs.length)](csc);
+  $('#challengeCount').textContent=`第 ${cq+1} / 5 題`;$('#challengeQuestion').textContent=q.q;$('#challengeChoices').innerHTML='';
+  q.opts.forEach(([v,t])=>{let b=document.createElement('button');b.className='choice';b.textContent=t;b.onclick=()=>{
+    $$('#challengeChoices .choice').forEach(x=>x.disabled=true);let ok=v===q.ans;b.classList.add(ok?'correct':'wrong');
+    if(!ok)[...$('#challengeChoices').children].forEach((x,i)=>{if(q.opts[i][0]===q.ans)x.classList.add('correct')});
+    state.total++;if(ok){state.correct++;state.streak++;cscore++}else state.streak=0;saveState();
+    $('#challengeFeedback').className='feedback show '+(ok?'ok':'no');$('#challengeFeedback').textContent=(ok?'答對。':'答錯。')+' '+csc.explain;
+    $('#challengeNext').classList.remove('hidden');
+  };$('#challengeChoices').appendChild(b)});
+  $('#challengeFeedback').className='feedback';$('#challengeNext').classList.add('hidden');
+}
+$('#challengeStart').onclick=startChallenge;$('#challengeNext').onclick=()=>{cq++;nextChallenge()};
+
+let rsc,rdata,revealed=false,cut=52;
+function newReveal(){rsc=randSc();rdata=scenarioData(rsc,Date.now()%100000);revealed=false;$('#revealResult').classList.add('hidden');$('#predictDir').value='';$('#predictReason').value='';drawReveal()}
+function drawReveal(){renderChart($('#revealChart'),rdata,{title:'遮右練習',timeframe:'日 K',mas:[5,10,20],visible:revealed?rdata.length:cut,mask:!revealed})}
+$('#revealNew').onclick=newReveal;$('#hideAgain').onclick=()=>{revealed=false;drawReveal();$('#revealResult').classList.add('hidden')};
+$('#revealBtn').onclick=()=>{
+  if(!$('#predictDir').value){alert('請先選擇你預測的方向。');return}
+  revealed=true;drawReveal();
+  const before=rdata[cut-1].c, after=rdata[rdata.length-1].c, pct=(after-before)/before;
+  const actual=pct>.025?'up':pct<-.025?'down':'flat'; const map={up:'偏上',down:'偏下',flat:'盤整'};
+  const ok=$('#predictDir').value===actual;state.total++;if(ok){state.correct++;state.streak++}else state.streak=0;saveState();
+  $('#revealResult').classList.remove('hidden');
+  $('#revealResult').innerHTML=`你的預測：<b>${map[$('#predictDir').value]}</b><br>實際結果：<b>${map[actual]}</b>（約 ${(pct*100).toFixed(1)}%）<br>${ok?'方向判斷正確。':'方向不同沒關係，回頭檢查你的理由是否忽略了位置、均線或壓力。'}<br><small>你的理由：${escapeHtml($('#predictReason').value||'未填寫')}</small>`;
+};
+
+$('#imageUpload').onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);$('#uploadBox').innerHTML=`<img src="${url}" alt="K線截圖">`};
+$('#clearImage').onclick=()=>{$('#imageUpload').value='';$('#uploadBox').innerHTML='<div>📷<br>上傳券商或看盤 App 的 K 線截圖<br><small>圖片只在你的瀏覽器中顯示，不會上傳到伺服器。</small></div>'};
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+$('#saveNote').onclick=()=>{
+  const item={date:new Date().toLocaleString('zh-TW'),symbol:$('#noteSymbol').value||'未命名',tf:$('#noteTf').value,trend:$('#noteTrend').value,pos:$('#notePos').value,support:$('#noteSupport').value,resistance:$('#noteResistance').value,observe:$('#noteObserve').value,conclusion:$('#noteConclusion').value};
+  state.notes.unshift(item);saveState();alert('已儲存練習紀錄。')
+};
+function renderHistory(){
+  const h=$('#history');if(!state.notes.length){h.innerHTML='<div class="tip">還沒有紀錄。完成一張自由看圖練習後按「儲存練習紀錄」。</div>';return}
+  h.innerHTML=state.notes.map((n,i)=>`<div class="history-item"><b>${escapeHtml(n.symbol)}</b> <span class="pill">${escapeHtml(n.tf)}</span><br><small>${escapeHtml(n.date)}</small><br>趨勢：${escapeHtml(n.trend)}｜位置：${escapeHtml(n.pos)}<br>支撐：${escapeHtml(n.support||'—')}｜壓力：${escapeHtml(n.resistance||'—')}<br>${escapeHtml(n.conclusion||n.observe||'')}</div>`).join('');
+}
+$('#clearNotes').onclick=()=>{if(confirm('確定清除全部練習紀錄？')){state.notes=[];saveState()}};
+$('#exportCsv').onclick=()=>{
+  if(!state.notes.length){alert('目前沒有可匯出的紀錄。');return}
+  const rows=[['日期','標的','週期','趨勢','位置','支撐','壓力','觀察','結論'],...state.notes.map(n=>[n.date,n.symbol,n.tf,n.trend,n.pos,n.support,n.resistance,n.observe,n.conclusion])];
+  const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='K線練習紀錄.csv';a.click();
+};
+
+renderStats();renderHistory();startGuided();newReveal();
+</script>
+
+<script>
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById('installAppBtn');
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  if (installBtn) installBtn.classList.remove('hidden');
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) {
+      alert('請使用瀏覽器選單中的「安裝應用程式」或「加入主畫面」。');
+      return;
+    }
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBtn.classList.add('hidden');
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  if (installBtn) installBtn.classList.add('hidden');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((err) => {
+      console.warn('Service Worker 註冊失敗：', err);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
