@@ -66,6 +66,9 @@
     .seg button{border:0;background:white;padding:9px 13px;font-weight:800;color:#475467}
     .seg button.active{background:#dbeafe;color:#1d4ed8}
     .chart-wrap{background:#0b1020;border-radius:16px;padding:10px;position:relative;overflow:hidden}
+    .chart-wrap svg{touch-action:none;user-select:none;-webkit-user-select:none}
+    .chart-crosshair-note{margin-top:8px;color:#667085;font-size:13px;line-height:1.55}
+    .chart-crosshair-note b{color:#344054}
     #chart{width:100%;height:430px;display:block}
     .legend{display:flex;gap:12px;flex-wrap:wrap;color:#475467;font-size:14px;margin-top:10px}
     .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}
@@ -154,7 +157,7 @@
   <section class="hero">
     <div>
       <h1>K 線新手練習室</h1>
-      <p>每天練一張圖：先看週期、再看位置與趨勢，最後才看紅綠 K。內建引導題、挑戰題、遮右揭曉與自由上傳練習。</p><div style="margin-top:10px"><span class="pill" style="background:#dbeafe;color:#1d4ed8">版本 v4・圖示解答加強版</span></div>
+      <p>每天練一張圖：先看週期、再看位置與趨勢，最後才看紅綠 K。內建引導題、挑戰題、遮右揭曉與自由上傳練習。</p><div style="margin-top:10px"><span class="pill" style="background:#dbeafe;color:#1d4ed8">版本 v5・新手判讀＋十字線精準數值版</span></div>
     </div>
     <div style="display:grid;gap:10px;justify-items:center">
       <div class="hero-badge">📈</div>
@@ -192,6 +195,7 @@
           <button class="btn outline small ma-toggle" data-ma="20">MA20</button>
         </div>
         <div class="chart-wrap"><svg id="chart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+        <div class="chart-crosshair-note"><b>查看精確價格：</b>把滑鼠移到 K 棒上，或用手指按住拖曳，即可顯示十字線、開盤、收盤、最高、最低、影線與成交量。</div>
         <div class="legend">
           <span><i class="dot" style="background:#ef4444"></i>紅 K：收盤高於開盤</span>
           <span><i class="dot" style="background:#22c55e"></i>綠 K：收盤低於開盤</span>
@@ -223,6 +227,7 @@
           <span class="pill" id="challengeCount">尚未開始</span>
         </div>
         <div class="chart-wrap"><svg id="challengeChart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+        <div class="chart-crosshair-note"><b>精準看圖：</b>滑鼠移動或手指拖曳，可查看每根紅 K／綠 K 的完整數值。</div>
       </div>
       <div class="card">
         <h2>挑戰題</h2>
@@ -244,6 +249,7 @@
           <button class="btn outline" id="hideAgain">重新遮住</button>
         </div>
         <div class="chart-wrap"><svg id="revealChart" viewBox="0 0 900 430" preserveAspectRatio="none"></svg></div>
+        <div class="chart-crosshair-note"><b>精準看圖：</b>滑鼠移動或手指拖曳，可查看目前已顯示 K 棒的完整數值。</div>
       </div>
       <div class="card">
         <h2>先寫判斷，再揭曉</h2>
@@ -486,17 +492,17 @@ function makeData(kind,seed=1,n=60){
 }
 const scenarios=[
  {id:'up',name:'多頭回檔',kind:'up',trend:'up',position:'middle',candle:'normal',volume:'healthy',
-  explain:'高點與低點持續墊高，均線多數向上；雖有回檔，但結構仍偏多。'},
+  explain:'近期高點與低點多數仍在墊高，均線方向偏上；右側雖然回檔，但目前較像上升結構中的整理。這不代表一定續漲，仍要觀察最近低點與短均線是否守住。'},
  {id:'down',name:'空頭反彈',kind:'down',trend:'down',position:'low',candle:'normal',volume:'weak',
-  explain:'高點與低點逐步降低，股價多在均線下方，反彈容易遇到均線壓力。'},
+  explain:'近期高點與低點多數持續下移，價格也較常位於均線下方；右側反彈尚未明確扭轉下降結構。後續要看能否放量突破前一個反彈高點與中短期均線。'},
  {id:'range',name:'箱型盤整',kind:'range',trend:'flat',position:'range',candle:'doji',volume:'quiet',
-  explain:'價格在固定區間反覆震盪，均線糾結，尚未出現明確方向。'},
+  explain:'價格在固定範圍內上下來回，均線較糾結，暫時沒有明確單邊趨勢。應等待放量突破壓力區或跌破支撐區，再確認新方向。'},
  {id:'breakout',name:'盤整突破',kind:'breakout',trend:'up',position:'breakout',candle:'strongup',volume:'breakout',
-  explain:'長時間盤整後向上突破，若成交量同步增加，突破可信度通常較高。'},
+  explain:'價格剛離開原本的整理區，並伴隨較大的紅 K 與量能增加，屬於偏強的突破訊號。但突破後仍要確認收盤能否站穩原壓力區，避免假突破。'},
  {id:'top',name:'高檔轉弱',kind:'top',trend:'down',position:'high',candle:'upper',volume:'sell',
-  explain:'大漲後接近高檔，出現長上影或跌破短均線，表示上方賣壓增加。'},
+  explain:'前段已累積明顯漲幅，目前仍位於全圖相對高位；最後一根長上影表示盤中上攻後被賣方壓回，上方賣壓增加。這是轉弱警訊，不代表一定反轉，需再觀察是否跌破短均線、前一個低點或出現放量下跌。'},
  {id:'bottom',name:'低檔轉強',kind:'bottom',trend:'up',position:'low',candle:'lower',volume:'buy',
-  explain:'長期下跌後在低檔出現承接，低點不再創低並站回短均線，可能開始轉強。'}
+  explain:'前段經歷明顯下跌，目前位於全圖相對低位；最後長下影表示下跌時出現買盤承接。這是止跌或轉強線索，但還要確認後續能否站回短均線並突破前一個反彈高點。'}
 ];
 function scenarioData(sc,seed){
   let d=makeData(sc.kind,seed,60);
@@ -508,6 +514,86 @@ function scenarioData(sc,seed){
   return d;
 }
 function sma(data,p,i){if(i<p-1)return null;let s=0;for(let k=i-p+1;k<=i;k++)s+=data[k].c;return s/p}
+function ensureChartCrosshair(svg){
+  if(svg.dataset.crosshairBound==='1')return;
+  svg.dataset.crosshairBound='1';
+
+  const hide=()=>{
+    const g=svg.querySelector('.chart-crosshair');
+    if(g)g.style.display='none';
+  };
+
+  const move=e=>{
+    const m=svg.__chartMeta;
+    const g=svg.querySelector('.chart-crosshair');
+    if(!m||!g||!m.data.length)return;
+    const rect=svg.getBoundingClientRect();
+    if(!rect.width||!rect.height)return;
+    const px=(e.clientX-rect.left)/rect.width*m.W;
+    const py=(e.clientY-rect.top)/rect.height*m.H;
+    const plotRight=m.W-m.pad.r;
+    const priceBottom=m.pad.t+(m.priceH-20);
+    if(px<m.pad.l||px>plotRight||py<m.pad.t||py>m.H-20){hide();return}
+
+    const idx=Math.max(0,Math.min(m.data.length-1,Math.floor((px-m.pad.l)/m.xStep)));
+    const k=m.data[idx];
+    const x=m.pad.l+idx*m.xStep+m.xStep/2;
+    const cursorY=Math.max(m.pad.t,Math.min(priceBottom,py));
+    const cursorPrice=m.max-(cursorY-m.pad.t)/(m.priceH-20)*m.range;
+    const candleColor=k.c>=k.o?'#ef4444':'#22c55e';
+    const candleName=k.c>=k.o?'紅 K（收盤高於開盤）':'綠 K（收盤低於開盤）';
+    const body=Math.abs(k.c-k.o);
+    const upper=k.h-Math.max(k.o,k.c);
+    const lower=Math.min(k.o,k.c)-k.l;
+
+    g.style.display='block';
+    const set=(sel,attrs={})=>{
+      const el=g.querySelector(sel);if(!el)return;
+      Object.entries(attrs).forEach(([key,val])=>el.setAttribute(key,val));
+    };
+    set('.cross-v',{x1:x,x2:x,y1:m.pad.t,y2:m.H-20});
+    set('.cross-h',{x1:m.pad.l,x2:plotRight,y1:cursorY,y2:cursorY});
+    set('.cross-candle-box',{x:x-m.body*.82,y:m.y(k.h),width:m.body*1.64,height:Math.max(3,m.y(k.l)-m.y(k.h)),stroke:candleColor});
+    set('.cross-open',{x1:x-m.body*.75,x2:x+m.body*.75,y1:m.y(k.o),y2:m.y(k.o)});
+    set('.cross-close',{x1:x-m.body*.75,x2:x+m.body*.75,y1:m.y(k.c),y2:m.y(k.c),stroke:candleColor});
+    set('.cross-high',{cx:x,cy:m.y(k.h)});
+    set('.cross-low',{cx:x,cy:m.y(k.l)});
+
+    const priceBoxX=plotRight-67;
+    set('.cross-price-bg',{x:priceBoxX,y:cursorY-10});
+    set('.cross-price-text',{x:plotRight-4,y:cursorY+4});
+    g.querySelector('.cross-price-text').textContent=cursorPrice.toFixed(1);
+
+    const boxW=246,boxH=138;
+    let tx=x+14;
+    if(tx+boxW>plotRight)tx=x-boxW-14;
+    tx=Math.max(m.pad.l+4,Math.min(plotRight-boxW-4,tx));
+    let ty=cursorY-boxH/2;
+    ty=Math.max(m.pad.t+4,Math.min(m.H-24-boxH,ty));
+    set('.cross-tip-bg',{x:tx,y:ty,width:boxW,height:boxH,stroke:candleColor});
+    const rows=[
+      `第 ${idx+1} 根｜${candleName}`,
+      `開盤 ${k.o.toFixed(1)}　收盤 ${k.c.toFixed(1)}`,
+      `最高 ${k.h.toFixed(1)}　最低 ${k.l.toFixed(1)}`,
+      `實體 ${body.toFixed(1)}　上影 ${upper.toFixed(1)}`,
+      `下影 ${lower.toFixed(1)}　成交量 ${Math.round(k.v)}`,
+      `十字線游標價：約 ${cursorPrice.toFixed(1)}`
+    ];
+    rows.forEach((text,i)=>{
+      const el=g.querySelector(`.cross-tip-line-${i+1}`);
+      if(!el)return;
+      el.setAttribute('x',tx+12);
+      el.setAttribute('y',ty+22+i*21);
+      el.setAttribute('fill',i===0?candleColor:'#e2e8f0');
+      el.textContent=text;
+    });
+  };
+
+  svg.addEventListener('pointermove',move);
+  svg.addEventListener('pointerdown',move);
+  svg.addEventListener('pointerleave',hide);
+  svg.addEventListener('pointercancel',hide);
+}
 function renderChart(svg,data,opt={}){
   const visible=opt.visible??data.length, d=data.slice(0,visible), W=900,H=430,pad={l:48,r:20,t:20,b:95};
   const priceH=H-pad.t-pad.b, volTop=H-78, volH=58;
@@ -536,7 +622,27 @@ function renderChart(svg,data,opt={}){
     s+=`<rect x="${mx}" y="${pad.t}" width="${W-mx-pad.r}" height="${priceH+58}" fill="#111827" opacity=".94"/>`;
     s+=`<text x="${mx+20}" y="${pad.t+44}" fill="#fbbf24" font-size="22" font-weight="700">未來 K 線已遮住</text>`;
   }
+  s+=`<g class="chart-crosshair" style="display:none;pointer-events:none">
+    <line class="cross-v" stroke="#f8fafc" stroke-width="1" stroke-dasharray="5 5" opacity=".8"/>
+    <line class="cross-h" stroke="#f8fafc" stroke-width="1" stroke-dasharray="5 5" opacity=".8"/>
+    <rect class="cross-candle-box" fill="none" stroke-width="2" rx="3" opacity=".95"/>
+    <line class="cross-open" stroke="#60a5fa" stroke-width="3"/>
+    <line class="cross-close" stroke-width="3"/>
+    <circle class="cross-high" r="3.5" fill="#f8fafc"/>
+    <circle class="cross-low" r="3.5" fill="#f8fafc"/>
+    <rect class="cross-price-bg" width="67" height="20" rx="4" fill="#111827" stroke="#94a3b8"/>
+    <text class="cross-price-text" text-anchor="end" fill="#f8fafc" font-size="12" font-weight="700"></text>
+    <rect class="cross-tip-bg" rx="9" fill="#111827" fill-opacity=".96" stroke-width="1.5"/>
+    <text class="cross-tip-line-1" font-size="13" font-weight="800"></text>
+    <text class="cross-tip-line-2" font-size="12"></text>
+    <text class="cross-tip-line-3" font-size="12"></text>
+    <text class="cross-tip-line-4" font-size="12"></text>
+    <text class="cross-tip-line-5" font-size="12"></text>
+    <text class="cross-tip-line-6" font-size="12"></text>
+  </g>`;
   svg.innerHTML=s;
+  svg.__chartMeta={data:d,W,H,pad,priceH,min,max,range,xStep,body,y,vy,opt};
+  ensureChartCrosshair(svg);
 }
 function fmtPrice(v){return Number(v).toFixed(1)}
 function fmtPct(v){return `${v>=0?'+':''}${v.toFixed(1)}%`}
@@ -587,7 +693,7 @@ function detailedExplanation(sc,data,item,selected,ok){
   const correctText=optionLabel(item,item.ans);
   const selectedText=optionLabel(item,selected);
   const maText=`MA5 約 ${fmtPrice(f.ma5)}（${f.ma5Slope}）、MA10 約 ${fmtPrice(f.ma10)}（${f.ma10Slope}）、MA20 約 ${fmtPrice(f.ma20)}（${f.ma20Slope}）`;
-  let evidence1='',evidence2='',exclude='',summary=sc.explain;
+  let evidence1='',evidence2='',exclude='',plain='',confirm='',summary=sc.explain;
 
   if(item.key==='trend'){
     evidence1=`最近約 12 根 K，收盤價由 ${fmtPrice(data[Math.max(0,data.length-13)].c)} 變為 ${fmtPrice(f.last.c)}，漲跌幅約 ${fmtPct(f.recentChange)}。`;
@@ -618,8 +724,9 @@ function detailedExplanation(sc,data,item,selected,ok){
   }
 
   if(item.key==='candle'){
-    evidence1=`最後一根 K：開盤 ${fmtPrice(f.last.o)}、收盤 ${fmtPrice(f.last.c)}、最高 ${fmtPrice(f.last.h)}、最低 ${fmtPrice(f.last.l)}。`;
-    evidence2=`實體長度約 ${fmtPrice(f.body)}，上影線約 ${fmtPrice(f.upper)}，下影線約 ${fmtPrice(f.lower)}。因此最明顯的外觀特徵是「${correctText}」。`;
+    const candleColorText=f.last.c>=f.last.o?'紅 K（收盤高於開盤）':'綠 K（收盤低於開盤）';
+    evidence1=`最後一根是 ${candleColorText}：開盤 ${fmtPrice(f.last.o)}、收盤 ${fmtPrice(f.last.c)}、最高 ${fmtPrice(f.last.h)}、最低 ${fmtPrice(f.last.l)}。`;
+    evidence2=`實體＝｜收盤－開盤｜＝${fmtPrice(f.body)}；上影線＝最高－開收較高者＝${fmtPrice(f.upper)}；下影線＝開收較低者－最低＝${fmtPrice(f.lower)}。所以最明顯的特徵是「${correctText}」。`;
     if(sc.candle==='upper') exclude='上影線明顯長於實體與下影線，代表價格衝高後被賣壓壓回；不能只看它是紅 K 或綠 K。';
     else if(sc.candle==='lower') exclude='下影線明顯長於實體與上影線，代表下跌後出現承接；關鍵不是單純收紅。';
     else if(sc.candle==='doji') exclude='開盤與收盤非常接近、實體很小，重點是多空僵持，而不是一般紅綠 K。';
@@ -644,6 +751,39 @@ function detailedExplanation(sc,data,item,selected,ok){
     exclude=`把位置、近期趨勢、最後 K 棒與量能合併後，最符合「${sc.name}」。單看某一根 K 或單一均線，容易選到其他相似情境。`;
   }
 
+  if(item.key==='trend'){
+    plain=sc.trend==='up'
+      ?'把它想成價格走樓梯往上：途中可以往下踩一階，但只要近期高點與低點整體仍往上移，趨勢仍偏多。'
+      :sc.trend==='down'
+      ?'把它想成價格走樓梯往下：途中可以反彈，但若高點與低點仍一階比一階低，下降結構尚未改變。'
+      :'價格像在一個箱子裡上下碰撞，還沒有真正離開上緣或下緣，因此先視為盤整。';
+    confirm=sc.trend==='up'?'觀察最近低點與短均線能否守住；若跌破，原本上升結構可能轉弱。':sc.trend==='down'?'觀察是否放量突破前一個反彈高點與均線；未突破前，不宜只因一兩根紅 K 就判定反轉。':'觀察是否帶量突破壓力區或跌破支撐區；在區間內仍以盤整處理。';
+  }
+  if(item.key==='position'){
+    plain=`位置不是看最後一根 K 的顏色，而是把目前收盤 ${fmtPrice(f.last.c)} 放進全圖最低 ${fmtPrice(f.min)} 到最高 ${fmtPrice(f.max)} 的範圍中比較。`;
+    confirm='再配合前高、前低、整理區上緣與下緣，確認目前究竟是低檔反彈、上升途中、高檔回落，還是剛突破。';
+  }
+  if(item.key==='candle'){
+    plain=sc.candle==='upper'
+      ?'盤中買方曾把價格推高，但高位賣單更多，收盤被壓回，所以留下長上影。'
+      :sc.candle==='lower'
+      ?'盤中賣方曾把價格壓低，但低位有買盤承接，收盤被拉回，所以留下長下影。'
+      :sc.candle==='doji'
+      ?'開盤和收盤幾乎在同一位置，表示這一段時間買賣雙方暫時僵持。'
+      :sc.candle==='strongup'
+      ?'收盤明顯高於開盤，而且紅色實體較大，表示這根 K 棒內買方推升力道較強。'
+      :'這根 K 的實體與上下影線都沒有特別突出，屬於一般波動，不應過度解讀。';
+    confirm=sc.candle==='upper'?'觀察下一根是否跌破這根 K 的低點或短均線；若反而放量突破這根最高價，賣壓可能被消化。':sc.candle==='lower'?'觀察下一根能否站穩並突破這根 K 的高點；若又跌破最低價，承接訊號可能失效。':'單根 K 棒只能提供線索，仍要搭配位置、下一根 K、均線與成交量確認。';
+  }
+  if(item.key==='volume'){
+    plain=f.volRatio>=1.5?'最後量柱明顯高於近期平均，表示這根 K 的交易參與度較高；但放量是好是壞，必須看它發生在上漲、下跌、高檔還是低檔。':f.volRatio<=.75?'最後量柱低於近期平均，表示市場參與度較低，這次漲跌的推動力可能不足。':'最後量能接近近期平均，沒有出現非常特殊的爆量或急縮量。';
+    confirm='比較後續價格是否延續原方向，以及成交量是否持續配合；只看單一根量柱容易誤判。';
+  }
+  if(item.key==='conclusion'){
+    plain=`把五件事一起看：位置、近期高低點、最後 K 棒、均線方向、成交量。綜合後最接近「${sc.name}」，而不是只用紅綠顏色猜漲跌。`;
+    confirm='答案描述的是目前最合理的情境，不是保證下一根一定上漲或下跌；接下來要用支撐、壓力與量價變化驗證。';
+  }
+
   const resultTitle=ok?'答對了':'這題答錯了';
   const answerLine=ok
     ?`你選擇「${selectedText}」，與圖形特徵一致。`
@@ -656,16 +796,18 @@ function detailedExplanation(sc,data,item,selected,ok){
       <div class="analysis-row"><b>① 圖上數值：</b>${evidence1}</div>
       <div class="analysis-row"><b>② 圖形依據：</b>${evidence2}</div>
       <div class="analysis-row"><b>③ 排除混淆：</b>${exclude}</div>
+      <div class="analysis-row"><b>④ 新手白話：</b>${plain}</div>
+      <div class="analysis-row"><b>⑤ 接下來確認：</b>${confirm}</div>
     </div>
-    <div class="analysis-summary"><b>結論：</b>${summary}</div>`;
+    <div class="analysis-summary"><b>本題結論：</b>${summary}</div>`;
 }
 function randSc(){return scenarios[Math.floor(Math.random()*scenarios.length)]}
 let tf='日K', mas=[5,10,20], guidedSc, guidedData, guidedIndex=0;
 const guidedQs=[
  sc=>({key:'trend',q:'這張圖目前最接近哪一種趨勢？',ans:sc.trend,opts:[['up','上升趨勢'],['down','下降趨勢'],['flat','盤整']],hint:'先看右側約 10～15 根 K 的高點、低點是否墊高或降低，不要只看最後一根 K。'}),
  sc=>({key:'position',q:'股價目前的位置較接近哪裡？',ans:sc.position,opts:[['low','相對低檔'],['middle','上升途中／半山腰'],['high','大漲後高檔'],['range','盤整區'],['breakout','剛突破整理區']],hint:'先比較整張圖的最高、最低與目前價格，再看右側是反彈、回檔還是突破。'}),
- sc=>({key:'candle',q:'最後一根 K 棒最值得注意的是？',ans:sc.candle,opts:[['normal','一般 K 棒，沒有特殊長影線'],['doji','十字線／多空僵持'],['upper','長上影線／上方賣壓'],['lower','長下影線／下方承接'],['strongup','實體大紅 K／買方較強']],hint:'直接比較最後一根 K 的實體、上影線與下影線長度。'}),
- sc=>({key:'volume',q:'成交量與走勢的關係較接近？',ans:sc.volume,opts:[['healthy','趨勢中量能大致正常'],['weak','反彈力道不足或賣壓偏重'],['quiet','盤整量縮、等待方向'],['breakout','突破時放量，可信度較高'],['sell','高檔放量不穩，注意賣壓'],['buy','低檔出量承接，可能轉強']],hint:'比較最後一根量柱和最近約 20 根平均量，再搭配股價位於高檔、低檔或突破區。'}),
+ sc=>({key:'candle',q:'最後一根 K 棒最值得注意的是？',ans:sc.candle,opts:[['normal','一般 K 棒，沒有特殊長影線'],['doji','十字線／多空僵持'],['upper','長上影線／上方賣壓'],['lower','長下影線／下方承接'],['strongup','實體大紅 K／買方較強']],hint:'把十字線移到最後一根 K：先看開盤與收盤決定紅／綠，再用最高、最低計算實體、上影線與下影線。'}),
+ sc=>({key:'volume',q:'成交量與走勢的關係較接近？',ans:sc.volume,opts:[['healthy','趨勢中量能大致正常'],['weak','反彈力道不足或賣壓偏重'],['quiet','盤整量縮、等待方向'],['breakout','突破時放量，可信度較高'],['sell','高檔放量不穩，注意賣壓'],['buy','低檔出量承接，可能轉強']],hint:'把十字線移到最後一根 K，查看成交量，再和最近約 20 根量柱比較；最後一定要搭配高檔、低檔或突破位置。'}),
  sc=>({key:'conclusion',q:'這張圖最合理的結論是？',ans:sc.id,opts:scenarios.map(x=>[x.id,x.name]),hint:'依序整合位置、近期趨勢、最後 K 棒、均線方向與成交量。'})
 ]
 function startGuided(){
