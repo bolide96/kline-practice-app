@@ -1,10 +1,11 @@
-const CACHE_NAME = 'kline-practice-pwa-v1';
+const CACHE_NAME = 'kline-practice-pwa-v2';
 const APP_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './assets/K線新手完整教學圖.png'
 ];
 
 self.addEventListener('install', event => {

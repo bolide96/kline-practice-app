@@ -106,6 +106,24 @@
     .pill{display:inline-block;padding:4px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:13px;font-weight:900}
     .result-box{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fafcff;line-height:1.7}
     .footer-note{margin-top:18px;text-align:center;color:#667085;font-size:14px}
+
+    .guide-hero{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+    .guide-poster{width:100%;display:block;border:1px solid var(--line);border-radius:16px;background:white}
+    .guide-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+    .lesson-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+    .lesson-card{border:1px solid var(--line);border-radius:16px;padding:16px;background:#fbfdff;line-height:1.75}
+    .lesson-card h3{display:flex;gap:9px;align-items:center;color:#173d77}
+    .lesson-num{width:30px;height:30px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center;font-weight:900;flex:0 0 auto}
+    .lesson-card ul{margin:8px 0 0;padding-left:23px}
+    .lesson-card li{margin:5px 0}
+    .lesson-highlight{background:#fff8e8;border:1px solid #f5c15c;border-radius:13px;padding:12px;color:#7c4700;font-weight:800}
+    .candle-demo{display:flex;gap:18px;align-items:center;justify-content:center;padding:14px;background:#0b1020;border-radius:14px;margin:12px 0}
+    .candle-shape{position:relative;width:34px;height:110px}
+    .candle-shape:before{content:"";position:absolute;left:15px;top:0;width:3px;height:110px;background:currentColor}
+    .candle-shape span{position:absolute;left:3px;top:28px;width:28px;height:55px;border-radius:3px;background:currentColor}
+    .candle-shape.red{color:#ef4444}.candle-shape.green{color:#22c55e}
+    @media(max-width:860px){.guide-hero{grid-template-columns:1fr}.lesson-grid{grid-template-columns:1fr}}
+
     .hidden{display:none!important}
     @media(max-width:860px){
       .hero{grid-template-columns:1fr}.hero-badge{display:none}
@@ -144,7 +162,7 @@
     <button class="tab" data-tab="challenge">挑戰模式</button>
     <button class="tab" data-tab="reveal">遮右揭曉</button>
     <button class="tab" data-tab="free">自由看圖</button>
-    <button class="tab" data-tab="learn">速查教學</button>
+    <button class="tab" data-tab="learn">完整教學</button>
   </nav>
 
   <section id="guided" class="panel active">
@@ -278,37 +296,141 @@
     </div>
   </section>
 
+
   <section id="learn" class="panel">
-    <div class="grid">
+    <div class="guide-hero">
       <div class="card">
-        <h2>新手看圖固定順序</h2>
-        <div class="mini-list">
-          <div class="mini-item"><span class="step-num">1</span><div><b>看週期</b><br>日 K 一根代表一天；週 K 一根代表一週；月 K 一根代表一個月。</div></div>
-          <div class="mini-item"><span class="step-num">2</span><div><b>看位置</b><br>同樣一根大紅 K，出現在低檔與高檔，意義完全不同。</div></div>
-          <div class="mini-item"><span class="step-num">3</span><div><b>看趨勢</b><br>高點、低點墊高是上升；高點、低點降低是下降。</div></div>
-          <div class="mini-item"><span class="step-num">4</span><div><b>看 K 棒</b><br>長上影看上方賣壓；長下影看下方承接；十字線代表暫時僵持。</div></div>
-          <div class="mini-item"><span class="step-num">5</span><div><b>看均線</b><br>股價在向上均線之上通常較強；均線向下通常較弱。</div></div>
-          <div class="mini-item"><span class="step-num">6</span><div><b>看成交量</b><br>突破放量通常較可靠；高檔爆量不漲要注意賣壓。</div></div>
-          <div class="mini-item"><span class="step-num">7</span><div><b>找支撐壓力</b><br>用「區域」思考，不要把它當成一個精準數字。</div></div>
+        <h2>新手版 K 線完整教學圖</h2>
+        <p style="color:var(--muted);line-height:1.7">這張圖把週期、K 棒、影線、位置、趨勢、均線、成交量及支撐壓力整理在同一頁。可以直接放大查看，也可以下載保存。</p>
+        <img class="guide-poster" src="./assets/K線新手完整教學圖.png" alt="新手版 K 線完整教學圖">
+        <div class="guide-actions">
+          <a class="btn primary" href="./assets/K線新手完整教學圖.png" download="K線新手完整教學圖.png">下載教學圖 PNG</a>
+          <a class="btn outline" href="./assets/K線新手完整教學圖.png" target="_blank" rel="noopener">另開大圖</a>
         </div>
       </div>
       <div class="card">
-        <h2>最簡單口訣</h2>
-        <div class="result-box" style="font-size:22px;font-weight:900;line-height:1.8">
-          先看大方向<br>
-          再看關鍵位置<br>
-          最後才看紅綠 K
+        <h2>看圖口訣</h2>
+        <div class="result-box" style="font-size:22px;font-weight:900;line-height:1.9">
+          ① 看週期<br>
+          ② 看位置<br>
+          ③ 看趨勢<br>
+          ④ 看 K 棒<br>
+          ⑤ 看均線<br>
+          ⑥ 看成交量<br>
+          ⑦ 找支撐壓力
         </div>
-        <h3 style="margin-top:18px">新手先不要做的事</h3>
-        <div class="mini-list">
-          <div class="mini-item">不要看到一根大紅 K 就追。</div>
-          <div class="mini-item">不要一開始同時開十幾個指標。</div>
-          <div class="mini-item">不要只猜明天漲跌，卻沒有失效條件。</div>
-          <div class="mini-item">不要用真金白銀測試還沒練熟的判斷。</div>
+        <div class="lesson-highlight" style="margin-top:14px">
+          先看大方向，再看關鍵位置，最後才看紅綠 K。
         </div>
       </div>
     </div>
+
+    <div class="lesson-grid">
+      <article class="lesson-card">
+        <h3><span class="lesson-num">1</span>先確認週期</h3>
+        <ul>
+          <li>日 K：一根代表一天。</li>
+          <li>週 K：一根代表一週。</li>
+          <li>月 K：一根代表一個月。</li>
+          <li>日 K 的 MA5 是 5 日平均；月 K 的 MA5 是 5 個月平均。</li>
+        </ul>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">2</span>一根 K 棒怎麼看</h3>
+        <div class="candle-demo">
+          <div style="text-align:center;color:white"><div class="candle-shape red"><span></span></div>紅 K<br><small>收盤高於開盤</small></div>
+          <div style="text-align:center;color:white"><div class="candle-shape green"><span></span></div>綠 K<br><small>收盤低於開盤</small></div>
+        </div>
+        <p>K 棒包含開盤、收盤、最高與最低四個價格。紅綠只代表這段時間誰較強，不代表下一根一定延續。</p>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">3</span>影線代表什麼</h3>
+        <ul>
+          <li><b>長上影線：</b>價格曾往上，但上方賣壓把它壓回。</li>
+          <li><b>長下影線：</b>價格曾往下，但下方出現買盤承接。</li>
+          <li><b>十字線：</b>開盤與收盤接近，多空暫時僵持。</li>
+        </ul>
+        <p>影線一定要搭配位置判讀；高檔長上影通常比低檔長上影更需要注意。</p>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">4</span>先看位置，再看紅綠</h3>
+        <ul>
+          <li>低檔大紅 K：可能開始轉強，也可能只是跌深反彈。</li>
+          <li>高檔大紅 K：可能延續強勢，也可能是最後加速。</li>
+          <li>同一種 K 棒，出現在不同位置，意義可能完全相反。</li>
+        </ul>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">5</span>趨勢怎麼看</h3>
+        <ul>
+          <li><b>上升：</b>高點越來越高，低點也越來越高。</li>
+          <li><b>下降：</b>高點越來越低，低點也越來越低。</li>
+          <li><b>盤整：</b>價格在固定區間內反覆震盪。</li>
+        </ul>
+        <p>看不清楚時可以選擇等待，不必勉強猜方向。</p>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">6</span>均線 MA 怎麼看</h3>
+        <ul>
+          <li>股價在向上均線上方，通常相對偏強。</li>
+          <li>股價在向下均線下方，通常相對偏弱。</li>
+          <li>均線糾結常代表盤整，等待方向。</li>
+          <li>均線是過去價格的平均，反應較慢，不能單獨使用。</li>
+        </ul>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">7</span>成交量怎麼搭配</h3>
+        <ul>
+          <li>上漲放量：買盤較積極。</li>
+          <li>下跌放量：賣壓較重。</li>
+          <li>突破放量：突破可信度通常較高。</li>
+          <li>高檔爆量卻漲不動：注意獲利了結或賣壓。</li>
+        </ul>
+      </article>
+
+      <article class="lesson-card">
+        <h3><span class="lesson-num">8</span>支撐與壓力</h3>
+        <ul>
+          <li><b>支撐：</b>跌到某個區域，較容易出現買盤。</li>
+          <li><b>壓力：</b>漲到某個區域，較容易出現賣盤。</li>
+          <li>支撐壓力應該畫成一個範圍，不是一個精準數字。</li>
+          <li>突破後的壓力可能轉為支撐；跌破後的支撐可能轉為壓力。</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>每張圖固定回答這七題</h2>
+      <div class="mini-list">
+        <div class="mini-item"><span class="step-num">1</span><div><b>現在是什麼週期？</b><br>日 K、週 K、月 K，還是分 K？</div></div>
+        <div class="mini-item"><span class="step-num">2</span><div><b>目前位於哪裡？</b><br>低檔、半山腰、盤整區、接近前高，還是高檔？</div></div>
+        <div class="mini-item"><span class="step-num">3</span><div><b>目前是哪種趨勢？</b><br>上升、下降、盤整，或看不清楚？</div></div>
+        <div class="mini-item"><span class="step-num">4</span><div><b>最新 K 棒透露什麼？</b><br>實體大小、長上影、長下影或十字線。</div></div>
+        <div class="mini-item"><span class="step-num">5</span><div><b>均線偏強還是偏弱？</b><br>股價在均線上或下？均線向上、向下或糾結？</div></div>
+        <div class="mini-item"><span class="step-num">6</span><div><b>成交量有沒有配合？</b><br>上漲放量、下跌放量、突破放量或量縮盤整？</div></div>
+        <div class="mini-item"><span class="step-num">7</span><div><b>支撐和壓力在哪裡？</b><br>先找到風險位置，再考慮可能方向。</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>最後只寫三句結論</h2>
+      <div class="result-box">
+        <b>第一句｜趨勢：</b>目前是上升、下降或盤整？<br>
+        <b>第二句｜關鍵位置：</b>支撐區與壓力區在哪裡？<br>
+        <b>第三句｜等待確認：</b>要突破哪裡、守住哪裡，或出現什麼量價變化？
+      </div>
+      <div class="lesson-highlight" style="margin-top:12px">
+        技術分析的用途是整理趨勢、位置與風險，不是保證預測未來。
+      </div>
+    </div>
   </section>
+
 
   <div class="footer-note">本工具只供學習技術分析與風險判讀，不構成投資建議，也不保證未來漲跌。</div>
 </div>
